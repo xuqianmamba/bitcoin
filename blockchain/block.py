@@ -11,51 +11,51 @@ from threading import Lock
 from blockchain.transaction import Transaction
 from blockchain.merkle_tree import merkle_root
 
-class Node:
-    def __init__(self, host, port, blockchain):
-        self.host = host
-        self.port = port
-        self.blockchain = blockchain
-        self.peers = []  # 存储已知的网络节点
+# class Node:
+#     def __init__(self, host, port, blockchain):
+#         self.host = host
+#         self.port = port
+#         self.blockchain = blockchain
+#         self.peers = []  # 存储已知的网络节点
 
-    def start_server(self):
-        t = threading.Thread(target=self._server)
-        t.start()
+#     def start_server(self):
+#         t = threading.Thread(target=self._server)
+#         t.start()
 
-    def _server(self):
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.bind((self.host, self.port))
-        server_socket.listen()
+#     def _server(self):
+#         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#         server_socket.bind((self.host, self.port))
+#         server_socket.listen()
 
-        while True:
-            conn, address = server_socket.accept()
-            client_thread = threading.Thread(target=self.handle_client, args=(conn,))
-            client_thread.start()
+#         while True:
+#             conn, address = server_socket.accept()
+#             client_thread = threading.Thread(target=self.handle_client, args=(conn,))
+#             client_thread.start()
 
-    def handle_client(self, connection):
-        while True:
-            data = connection.recv(1024)
-            if not data:
-                break
+#     def handle_client(self, connection):
+#         while True:
+#             data = connection.recv(1024)
+#             if not data:
+#                 break
             
-            # 假设收到的数据是其他节点的区块链
-            received_blockchain = Blockchain.from_json(data.decode())
-            self.blockchain.resolve_conflicts([received_blockchain])
+#             # 假设收到的数据是其他节点的区块链
+#             received_blockchain = Blockchain.from_json(data.decode())
+#             self.blockchain.resolve_conflicts([received_blockchain])
 
-        connection.close()
+#         connection.close()
 
-    def connect_with_node(self, host, port):
-        self.peers.append((host, port))
+#     def connect_with_node(self, host, port):
+#         self.peers.append((host, port))
 
-    def send_blockchain_to_peers(self):
-        for peer in self.peers:
-            try:
-                client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                client_socket.connect(peer)
-                client_socket.send(self.blockchain.to_json().encode())
-                client_socket.close()
-            except Exception as e:
-                print(f"Connection to peer {peer} failed: {e}")
+#     def send_blockchain_to_peers(self):
+#         for peer in self.peers:
+#             try:
+#                 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#                 client_socket.connect(peer)
+#                 client_socket.send(self.blockchain.to_json().encode())
+#                 client_socket.close()
+#             except Exception as e:
+#                 print(f"Connection to peer {peer} failed: {e}")
 
 class Block:
     def __init__(self, index, transactions, timestamp, previous_hash, nonce=0):
