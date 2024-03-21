@@ -1,14 +1,16 @@
 import hashlib
+import time
 class Transaction:
     #交易有没有判别法
     def __init__(self, from_address, to_address, amount):
         self.from_address = from_address
         self.to_address = to_address
         self.amount = amount
+        self.timestamp = time.time()
         self.signature = ""
 
     def calculate_hash(self):
-        transaction_string = f"{self.from_address}{self.to_address}{self.amount}"
+        transaction_string = f"{self.from_address}{self.to_address}{self.amount}{self.timestamp}"
         return hashlib.sha256(transaction_string.encode()).hexdigest()
 
     def sign_transaction(self, signing_key):

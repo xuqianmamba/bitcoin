@@ -6,7 +6,8 @@ import socket
 import threading
 import json
 import sys
-from blockchain.block import Block, Blockchain
+from threading import Lock
+# from blockchain.block import Block, Blockchain
 from blockchain.transaction import Transaction
 from blockchain.merkle_tree import merkle_root
 
@@ -76,6 +77,7 @@ class Blockchain:
         self.difficulty = 4
         self.pending_transactions = []
         self.mining_reward = 100
+        self.lock = Lock()  # 在这里添加一个锁对象
 
     def create_genesis_block(self):
         return Block(0, [], time.time(), "0")
@@ -101,7 +103,8 @@ class Blockchain:
 
     def add_transaction(self, transaction):
         # Here should be validation checks for the transaction
-        self.pending_transactions.append(transaction)
+        with self.lock:
+            self.pending_transactions.append(transaction)
     
     def is_chain_valid(self, chain):
         # 检查链是否有效
