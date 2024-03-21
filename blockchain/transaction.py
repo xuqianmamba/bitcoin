@@ -1,5 +1,6 @@
 import hashlib
 class Transaction:
+    #交易有没有判别法
     def __init__(self, from_address, to_address, amount):
         self.from_address = from_address
         self.to_address = to_address
