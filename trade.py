@@ -10,37 +10,15 @@ from threading import Lock
 import json
 
 from wallet.wallet import Wallet
-
+from wallet.walletstate import WalletState
 # 创建一个锁对象
 lock = Lock()
 my_wallet =  Wallet() 
 
 
-# def mine_transactions():
-#     while True:
-#         with lock:
-#             if transactionPool:
-#                 print("发现待处理的交易，开始挖矿...")
-#                 # 复制transactionPool中的所有待处理的交易
-#                 transactions = transactionPool.copy()
-#                 # 清空transactionPool
-#                 transactionPool.clear()
-
-#         # 假设mine_pending_transactions方法接受一个交易列表作为参数
-#         # 注意：挖矿操作和广播不应在持有锁的情况下进行，以避免不必要的阻塞
-#         new_block = my_blockchain.mine_pending_transactions(transactions)
-#         # 假设broadcast_block方法用于广播新挖掘的区块
-#         my_blockchain.broadcast_block(new_block)
-#         print("新区块已广播")
-
-#         # 每秒检查一次
-#         time.sleep(1)
-
-
-
 def handle_client_connection(client_socket, address):
     # 接收客户端发送的消息
-    message = client_socket.recv(4).decode('utf-8')  # 修改接收长度为1024，以确保能接收完整的消息
+    message = client_socket.recv(4).decode('utf-8')
     if not message:
         return  # 客户端关闭连接
     
@@ -62,8 +40,11 @@ def handle_client_connection(client_socket, address):
         #     new_transaction.timestamp = transaction_data['timestamp']
         # if 'signature' in transaction_data and transaction_data['signature']:
         #     new_transaction.signature = bytes.fromhex(transaction_data['signature'])
-        my_blockchain.add_transaction(new_transaction)
-        print("新交易创建成功")
+        if my_blockchain.add_transaction(new_transaction):
+            print("新交易创建成功")
+        else:
+            print("新交易创建失败")
+
 
     elif message.startswith('UPDT'):
         # 这里添加更新区块链的逻辑
@@ -81,11 +62,17 @@ def handle_client_connection(client_socket, address):
         # 使用接收到的信息创建一个新的block对象
         new_block = create_block_from_dict(block_data)
         ok = False
+        cnt = 0
+        print(new_block.to_dict())
+        for b in my_blockchain.chain:
+            print(b.to_dict())
         if not any(b.hash == new_block.hash for b in my_blockchain.chain):
+            # print("nonce ok")
             if new_block.previous_hash == my_blockchain.get_last_block().hash:
+                # print("previous hash ok")
                 if my_blockchain.calculate_hash()[:my_blockchain.difficulty] == '0' * my_blockchain.difficulty:
+                    # print("difficulty ok")
                     my_state = WalletState(my_blockchain)
-                    cnt = 0
                     for transaction in new_block.transactions:
                         if my_state.add_transaction(transaction):
                             cnt += 1
@@ -93,7 +80,9 @@ def handle_client_connection(client_socket, address):
                             break
                     if cnt == len(new_block.transactions):
                         ok = True
+        
         if ok:
+            print("ok",my_state.wallet_map)
             with my_blockchain.lock:
                 my_blockchain.chains.append(new_block)
                 new_list = []
@@ -101,6 +90,8 @@ def handle_client_connection(client_socket, address):
                     if transaction not in new_block.transactions:
                         new_list.append(transaction)
                 my_blockchain.pending_transactions = new_list
+        else:
+            print("Fail",f"{cnt}/{len(new_block.transactions)}")
     else:
         print("Unknown command!")
     # 可以根据需要添加更多的条件分支
@@ -149,25 +140,6 @@ def start_server(port):
 # 初始化
 my_blockchain = Blockchain()
 
-# 假设这是网络中接收到的其它节点的链
-neighbor_chains = []
-
-# 在这里我们可能会从网络中接收其它节点的区块链版本
-# 为了模拟，我们将手动添加一些区块链
-# 在实际应用中，这些信息会通过网络传输
-# neighbor_chains.append(other_blockchain.chain)
-
-# 解决冲突，选择最长的有效链
-if my_blockchain.resolve_conflicts(neighbor_chains):
-    print("我们的链被替换了")
-else:
-    print("我们的链是权威的")
-
-# 生成密钥对
-sender_sk = SigningKey.generate(curve=NIST384p)
-sender_vk = sender_sk.verifying_key
-receiver_sk = SigningKey.generate(curve=NIST384p)
-receiver_vk = receiver_sk.verifying_key
 
 # # 创建交易
 # transaction1 = Transaction(sender_vk.to_string().hex(), receiver_vk.to_string().hex(), 10)

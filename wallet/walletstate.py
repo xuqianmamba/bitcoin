@@ -39,4 +39,5 @@ class WalletState:
         if to_address not in self.wallet_map:
             self.wallet_map[to_address] = 0
         self.wallet_map[to_address] += amount
+        print("Add to my_state",to_address,self.wallet_map[to_address])
         return True

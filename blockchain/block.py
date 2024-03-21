@@ -213,15 +213,11 @@ class Blockchain:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.connect((node, port))
                 s.send("UPDT".encode('utf-8'))  # 发送一个标识符，让接收方知道这是一个区块链数据
-                # print("************************")
-                # chain_data = s.recv(1024*1024).decode('utf-8')
-                # print(chain_data)
+
                 chain_data = s.recv(1024*1024).decode('utf-8')
-                # print("************************")
-                # print(chain_data)
+
                 chain_data = json.loads(chain_data)
                 
-                # print("************************")
                 return create_chain_from_dict(chain_data)
                 # response = s.recv(1024)
                 # print(f"Received response: {response.decode('utf-8')}")
@@ -262,6 +258,8 @@ class Blockchain:
         # Here should be validation checks for the transaction
         with self.lock:
             self.pending_transactions.append(transaction)
+        print(transaction.to_dict())
+        return True
     
     def is_chain_valid(self, chain):
         # 检查链是否有效
