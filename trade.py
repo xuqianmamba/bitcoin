@@ -4,51 +4,43 @@ from ecdsa import SigningKey, NIST384p
 from blockchain.merkle_tree import merkle_root
 import socket
 import threading
+import asyncio
 
-def handle_client_connection(client_socket):
-    try:
-        while True:
-            # 接收客户端发送的消息
-            message = client_socket.recv(1024).decode('utf-8')
-            if not message:
-                break  # 客户端关闭连接
-            
-            print(f"Received message: {message}")
-            
-            # 根据收到的消息类型执行不同的操作
-            if message.startswith('SEND_BLOCK'):
-                # 这里添加处理发送区块到区块链的逻辑
-                pass
-            elif message.startswith('UPDATE_BLOCKCHAIN'):
-                # 这里添加更新区块链的逻辑
-                pass
-            elif message.startswith('MINE'):
-                # 这里添加挖矿的逻辑
-                pass
-            # 可以根据需要添加更多的条件分支
-            
-            # 发送响应给客户端
-            client_socket.sendall("ACK".encode('utf-8'))
-    finally:
-        client_socket.close()
-
-def start_server(port):
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('0.0.0.0', port))
-    server_socket.listen(5)
-    print(f"Listening on port {port}...")
+async def handle_client_connection(reader, writer, request_id):
+    data = await reader.read(1024)
+    message = data.decode('utf-8')
+    addr = writer.get_extra_info('peername')
     
-    try:
-        while True:
-            client_sock, address = server_socket.accept()
-            print(f"Accepted connection from {address}")
-            client_handler = threading.Thread(
-                target=handle_client_connection,
-                args=(client_sock,)
-            )
-            client_handler.start()
-    finally:
-        server_socket.close()
+    print(f"Received {message} from {addr}")
+    
+    print(f"Received message: {message}")
+    
+    # 根据收到的消息类型执行不同的操作
+    if message.startswith('SEND_BLOCK'):
+        # 这里添加处理发送区块到区块链的逻辑
+        pass
+    elif message.startswith('UPDATE_BLOCKCHAIN'):
+        # 这里添加更新区块链的逻辑
+        pass
+    elif message.startswith('MINE'):
+        # 这里添加挖矿的逻辑
+        pass
+    # 可以根据需要添加更多的条件分支
+    
+    # 发送响应给客户端
+    writer.write("ACK".encode('utf-8'))
+    await writer.drain()
+    writer.close()
+
+async def start_server(port):
+    server = await asyncio.start_server(
+        handle_client_connection, '0.0.0.0', port)
+    addr = server.sockets[0].getsockname()
+    
+    print(f'Serving on {addr}')
+    async with server:
+        await server.serve_forever()
+
 
 
 # 初始化
@@ -108,9 +100,10 @@ for block in my_blockchain.chain:
     print(f"区块随机数Nonce: {block.nonce}")
     print(f"上一个区块的哈希: {block.previous_hash}")
     print(f"区块哈希: {block.hash}")
-    print(f"默克尔
+    # print(f"默克尔
+
 
 
 if __name__ == '__main__':
     PORT = 5000  # 选择一个端口号
-    start_server(PORT)
+    asyncio.run(start_server(PORT))
