@@ -8,6 +8,7 @@ import time
 from queue import Queue
 from threading import Lock
 
+
 # 创建一个锁对象
 lock = Lock()
 
