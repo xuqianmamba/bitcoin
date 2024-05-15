@@ -27,7 +27,7 @@ def handle_client_connection(client_socket, address):
     # 根据收到的消息类型执行不同的操作
     if message == 'SEND':
         # 接收后续的交易数据
-        transaction_data_bytes = client_socket.recv(1024)  # 假设交易数据不会超过1024字节
+        transaction_data_bytes = client_socket.recv(1024 * 1024)  # 假设交易数据不会超过1024字节
         transaction_data_str = transaction_data_bytes.decode('utf-8')
         transaction_data = json.loads(transaction_data_str)  # 将JSON字符串反序列化为字典
 

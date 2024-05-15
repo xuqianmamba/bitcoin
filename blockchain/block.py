@@ -150,6 +150,9 @@ class Block:
         self.merkle_root = merkle_root([tx.calculate_hash() for tx in transactions])
         self.hash = self.calculate_hash()
 
+    def sign_header(data,key):
+        return ""
+
     def calculate_hash(self):
         block_string = f"{self.index}{self.merkle_root}{self.timestamp}{self.previous_hash}{self.nonce}"
         return hashlib.sha256(block_string.encode()).hexdigest()
@@ -169,7 +172,7 @@ class Block:
 class Blockchain:
     def __init__(self):
         self.chain = [self.create_genesis_block()]
-        self.difficulty = 1
+        self.difficulty = 0
         self.pending_transactions = []
         self.mining_reward = 100
         self.lock = Lock()  # 在这里添加一个锁对象
@@ -233,7 +236,7 @@ class Blockchain:
         # 执行工作量证明算法
         block.nonce = self.proof_of_work(block)
         block.hash  = block.calculate_hash()
-        # 检查区块链中是否已存在该nonce
+        # block.hash = 0
         if not any(b.hash == block.hash for b in self.chain):
             print(f"Block successfully mined! Hash: {block.hash}")
             self.chain.append(block)
@@ -243,14 +246,15 @@ class Blockchain:
             # self.pending_transactions = [Transaction(None, mining_reward_address, self.mining_reward).to_dict()]
         else:
             print("Mining result already exists, discarding the result.")
+    
 
     def proof_of_work(self, block):
         block.nonce = 0
         computed_hash = block.calculate_hash()
         #这里要break 并且返回
-        while computed_hash[:self.difficulty] != '0' * self.difficulty:
-            block.nonce += 1
-            computed_hash = block.calculate_hash()
+        # while computed_hash[:self.difficulty] != '0' * self.difficulty:
+        #     block.nonce += 1
+        #     computed_hash = block.calculate_hash()
         # print("in",block.to_dict())
         return block.nonce
 
@@ -304,3 +308,16 @@ class Blockchain:
             'pending_transactions': [tx.to_dict() for tx in self.pending_transactions],
             'mining_reward': self.mining_reward,
         }
+    def mine_pending_transactions_PBFT(self, mining_reward_address):
+        # 创建新区块
+        with self.lock:
+            self.pending_transactions.append(Transaction(None, mining_reward_address, self.mining_reward))
+            block = Block(len(self.chain), self.pending_transactions, time.time(), self.get_last_block().hash)
+            self.pending_transactions = []
+        # 执行工作量证明算法
+        block.nonce = self.proof_of_work(block)
+        block.hash  = block.calculate_hash()
+        # block.hash = 0
+        # if not any(b.hash == block.hash for b in self.chain):
+        print(f"Block successfully mined! Hash: {block.hash}")
+        self.chain.append(block)
