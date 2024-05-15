@@ -63,15 +63,17 @@ def handle_client_connection(client_socket, address):
         new_block = create_block_from_dict(block_data)
         ok = False
         cnt = 0
-        print(new_block.to_dict())
-        for b in my_blockchain.chain:
-            print(b.to_dict())
+        # print("my_blockchain.chain",type(my_blockchain.chain))
+        # for b in my_blockchain.chain:
+        #     print(b.to_dict(),b.hash == new_block.hash)
+        # print(any(b.hash == new_block.hash for b in my_blockchain.chain))
+        print(new_block.index,my_blockchain.get_last_block().index)
         if not any(b.hash == new_block.hash for b in my_blockchain.chain):
-            # print("nonce ok")
+            print("nonce ok")
             if new_block.previous_hash == my_blockchain.get_last_block().hash:
-                # print("previous hash ok")
+                print("previous hash ok")
                 if my_blockchain.calculate_hash()[:my_blockchain.difficulty] == '0' * my_blockchain.difficulty:
-                    # print("difficulty ok")
+                    print("difficulty ok")
                     my_state = WalletState(my_blockchain)
                     for transaction in new_block.transactions:
                         if my_state.add_transaction(transaction):
@@ -118,8 +120,8 @@ def start_server(port):
     print(f"Listening on port {port}...")
     
     # 创建并启动询问最长链的线程
-    chain_query_thread = threading.Thread(target=schedule_chain_queries, args=(10,))
-    chain_query_thread.start()
+    # chain_query_thread = threading.Thread(target=schedule_chain_queries, args=(10,))
+    # chain_query_thread.start()
     
 
     mining_thread = threading.Thread(target=mining, args=(3,))
@@ -168,14 +170,6 @@ my_blockchain = Blockchain()
 
 
 # 打印区块链信息来验证
-for block in my_blockchain.chain:
-    print(f"区块索引: {block.index}")
-    print(f"区块时间戳: {block.timestamp}")
-    print(f"区块交易: {block.transactions}")
-    print(f"区块随机数Nonce: {block.nonce}")
-    print(f"上一个区块的哈希: {block.previous_hash}")
-    print(f"区块哈希: {block.hash}")
-    # print(f"默克尔
 
 
 if __name__ == '__main__':

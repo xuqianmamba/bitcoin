@@ -173,7 +173,7 @@ class Blockchain:
         self.pending_transactions = []
         self.mining_reward = 100
         self.lock = Lock()  # 在这里添加一个锁对象
-        self.nodes = {'localhost'}  # 假设'localhost'代表当前节点或默认节点
+        self.nodes = {'10.77.110.159'}  # 假设'localhost'代表当前节点或默认节点
 
 
     def create_genesis_block(self):
@@ -183,8 +183,8 @@ class Blockchain:
         return self.chain[-1]
 
     def send_block_to_node(self,node, port, block):
-        """向指定的节点发送交易"""
-        print(type(block))
+        """向指定的节点发送更新块"""
+        # print(type(block))
         block_data = json.dumps(block.to_dict()).encode('utf-8')  # 使用to_dict方法
         # block_data = json.dumps(block.__dict__).encode('utf-8')  # 将交易转换为JSON格式
         try:
@@ -201,8 +201,8 @@ class Blockchain:
         neighbor_chains = [self]
         for node in self.nodes:
             updated_chain = self.update_chains_from_node(node)
-            # if updated_chain is not None:  # 确保返回的是有效的Blockchain对象
-            neighbor_chains.append(updated_chain)
+            if updated_chain is not None:  # 确保返回的是有效的Blockchain对象
+                neighbor_chains.append(updated_chain)
         return self.resolve_conflicts(neighbor_chains)
 
 
