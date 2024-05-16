@@ -240,7 +240,27 @@ class PBFTNode(Node):
             self.committed = True
             print(f"Node {self.node_id}: Executed request: {request}")
 
+def leader_server(node,port):
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(('0.0.0.0', port))
+    server_socket.listen(5)
+    print(f"Listening on port {port}...")
     
+    try:
+        while True:
+            client_sock, address = server_socket.accept()
+            print(f"Accepted connection from {address}")
+            client_handler = threading.Thread(
+                target=handle_client_connection,
+                args=(client_sock, address)
+            )
+            client_handler.start()
+    finally:
+        server_socket.close()
+
+if __name__ == '__main__':
+    node = Node()
+    leader_server(node,7777)
 
 # nodes = [PBFTNode(i) for i in range(4)]
 # nodes.append(PBFTNode(4, is_faulty=True))  # 添加一个拜占庭节点
