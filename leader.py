@@ -94,7 +94,7 @@ class Node:
                     block = self.blockchain.get_last_block()
                     threads = []
                     for node in self.nodes:
-                        now_thread = threading.Thread(target=send_block_to_node, args=(self,header,node_id,node,5000,block))
+                        now_thread = threading.Thread(target=send_block_to_node, args=(self,header,node_id,node,7777,block))
                         threads.append(now_thread)
                     for thread in threads:
                         thread.start()
@@ -120,7 +120,7 @@ class Node:
                     header = "COMMIT"
                     threads = []
                     for node in self.nodes:
-                        now_thread = threading.Thread(target=send_block_to_node, args=(self,header,node_id,node,5000,block))
+                        now_thread = threading.Thread(target=send_block_to_node, args=(self,header,node_id,node,7779,block))
                         threads.append(now_thread)
                     for thread in threads:
                         thread.start()
@@ -157,7 +157,7 @@ class Node:
                     block = self.blockchain.get_last_block()
                     threads = []
                     for node in self.nodes:
-                        now_thread = threading.Thread(target=send_block_to_node, args=(self,header,node_id,node,5000,block))
+                        now_thread = threading.Thread(target=send_block_to_node, args=(self,header,node_id,node,7778,block))
                         threads.append(now_thread)
                     for thread in threads:
                         thread.start()
@@ -181,7 +181,7 @@ class Node:
                     header = "COMMIT"
                     threads = []
                     for node in self.nodes:
-                        now_thread = threading.Thread(target=send_block_to_node, args=(self,header,node_id,node,5000,block))
+                        now_thread = threading.Thread(target=send_block_to_node, args=(self,header,node_id,node,7779,block))
                         threads.append(now_thread)
                     for thread in threads:
                         thread.start()
